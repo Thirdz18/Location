@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>School Supply Giveaway Entry Form</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="entry">
+    <main class="page">
+      <section class="card">
+        <p class="badge">🎒 School Supply Support Giveaway</p>
+        <h1>₱200 School Supply Giveaway Form</h1>
+
+        <div class="tab-actions">
+          <a href="/entry.html" class="secondary-btn is-active">Entry Form</a>
+          <a href="/voting.html" class="secondary-btn">Voting Page</a>
+        </div>
+
+        <section id="entryTab" class="tab-panel is-active">
+          <p class="subtitle">
+            Unlimited users can fill out this form until <strong>May 30, 2026</strong>. All approved entries will appear in the voting list.
+            The <strong>top 2 highest votes</strong> will win <strong>₱200 each</strong>.
+          </p>
+
+          <div class="deadline-box">
+            <p class="deadline-label">Form Deadline</p>
+            <p id="deadlineText" class="deadline-text">Entries close on May 30, 2026</p>
+            <p id="countdownTimer" class="countdown-timer" aria-live="polite">Loading timer...</p>
+          </div>
+
+          <form id="giveawayForm" class="form">
+            <label>Full Name<input type="text" name="full_name" placeholder="Juan Dela Cruz" required /></label>
+            <label>
+              Mobile Number
+              <input type="tel" name="mobile_number" placeholder="09XXXXXXXXX" pattern="^09\d{9}$" required />
+            </label>
+            <label>Age<input type="number" name="age" min="13" max="100" required /></label>
+            <label>
+              Full Address
+              <textarea
+                name="address"
+                rows="3"
+                placeholder="Complete address will be auto-filled after clicking Use My Current Location"
+                required
+                readonly
+                aria-readonly="true"
+              ></textarea>
+            </label>
+
+            <div class="location-wrap">
+              <button type="button" id="locateBtn" class="secondary-btn">Use My Current Location</button>
+              <p id="locationStatus" class="status-text">Location is required. Click Use My Current Location to continue.</p>
+            </div>
+
+            <label class="checkbox">
+              <input type="checkbox" name="consent" required />
+              <span>I agree to share my details for this giveaway and voting process.</span>
+            </label>
+
+            <button type="submit" class="primary-btn">Submit Entry</button>
+            <p id="formStatus" class="status-text" aria-live="polite"></p>
+          </form>
+        </section>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
