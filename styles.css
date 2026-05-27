@@ -114,6 +114,17 @@ textarea:focus {
   border-color: #7ca1f9;
 }
 
+
+textarea[readonly] {
+  background: #f5f8ff;
+  color: #45557a;
+  cursor: not-allowed;
+}
+
+textarea[readonly]:focus {
+  outline: none;
+  border-color: #c6d4f6;
+}
 .location-wrap {
   display: grid;
   gap: 0.45rem;

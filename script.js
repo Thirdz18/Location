@@ -60,18 +60,22 @@ async function requestLocation() {
 
       try {
         const address = await reverseGeocode(lat, lon);
-        if (address) {
-          form.elements.address.value = address;
+        if (!address) {
+          throw new Error('Unable to resolve a complete address from your location.');
         }
-        setStatus(locationStatus, 'Location captured and address auto-filled.', 'success');
+
+        form.elements.address.value = address;
+        setStatus(locationStatus, 'Location captured and complete address auto-filled.', 'success');
       } catch (error) {
-        setStatus(locationStatus, `${error.message} Please type your address manually.`, 'error');
+        latestCoords = null;
+        form.elements.address.value = '';
+        setStatus(locationStatus, `${error.message} Please try location again.`, 'error');
       }
     },
     (error) => {
       setStatus(
         locationStatus,
-        `Location permission denied or unavailable (${error.message}). You can continue with manual address entry.`,
+        `Location permission denied or unavailable (${error.message}). Location access is required to submit.`,
         'error'
       );
     },
@@ -88,6 +92,15 @@ async function submitEntry(event) {
 
   if (!supabaseClient) {
     setStatus(formStatus, 'Configuration is still loading. Please wait and try again.', 'error');
+    return;
+  }
+
+  if (!latestCoords || !form.elements.address.value.trim()) {
+    setStatus(
+      formStatus,
+      'Please click Use My Current Location first so we can fetch your complete address.',
+      'error'
+    );
     return;
   }
 
@@ -114,7 +127,7 @@ async function submitEntry(event) {
 
   form.reset();
   latestCoords = null;
-  setStatus(locationStatus, 'Location not requested yet.');
+  setStatus(locationStatus, 'Location is required. Click Use My Current Location to continue.');
   setStatus(formStatus, 'Entry submitted successfully. Good luck! 🎉', 'success');
 }
 
