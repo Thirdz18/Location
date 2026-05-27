@@ -9,6 +9,12 @@ const candidateList = document.getElementById('candidateList');
 const voteStatus = document.getElementById('voteStatus');
 const countdownTimer = document.getElementById('countdownTimer');
 const deadlineText = document.getElementById('deadlineText');
+const winnerStatus = document.getElementById('winnerStatus');
+const winnerList = document.getElementById('winnerList');
+const shareVoteWrap = document.getElementById('shareVoteWrap');
+const shareVoteLink = document.getElementById('shareVoteLink');
+const copyVoteLinkBtn = document.getElementById('copyVoteLinkBtn');
+const copyVoteStatus = document.getElementById('copyVoteStatus');
 
 let latestCoords = null;
 let supabaseClient = null;
@@ -21,6 +27,7 @@ const ENTRY_DEADLINE = new Date('2026-05-30T23:59:59Z');
 
 const DEVICE_KEY = 'giveaway_device_id';
 const DEVICE_VOTED_KEY = 'giveaway_device_voted';
+const DEVICE_ENTRY_LOCK_KEY = 'giveaway_entry_submitted';
 
 function getDeviceId() {
   let deviceId = window.localStorage.getItem(DEVICE_KEY);
@@ -54,7 +61,7 @@ function formatTimeLeft(ms) {
 
 function startCountdown() {
   if (deadlineText) {
-    deadlineText.textContent = 'Entries close on May 30, 2026 (UTC).';
+    deadlineText.textContent = 'Ang pagsumite kutob sa May 30, 2026 (UTC).';
   }
 
   const updateTimer = () => {
@@ -62,12 +69,12 @@ function startCountdown() {
     const remaining = ENTRY_DEADLINE.getTime() - now.getTime();
 
     if (remaining <= 0) {
-      countdownTimer.textContent = 'Form entry is now closed.';
+      countdownTimer.textContent = 'Sirado na ang pagsumite sa porma.';
       countdownTimer.classList.add('error');
       return true;
     }
 
-    countdownTimer.textContent = `Time left to fill out: ${formatTimeLeft(remaining)}`;
+    countdownTimer.textContent = `Nahibiling oras para mosumite: ${formatTimeLeft(remaining)}`;
     return false;
   };
 
@@ -88,7 +95,7 @@ function setStatus(target, message, type = '') {
 }
 
 async function loadSupabaseClient() {
-  setStatus(formStatus || voterStatus, 'Loading secure configuration...');
+  setStatus(formStatus || voterStatus, 'Gi-andam ang secure nga configuration...');
   const response = await fetch('/api/config');
   const data = await response.json();
 
@@ -98,7 +105,7 @@ async function loadSupabaseClient() {
 
   supabaseClient = window.supabase.createClient(data.supabaseUrl, data.supabaseAnonKey);
   googleMapsApiKey = data.googleMapsApiKey;
-  setStatus(formStatus || voterStatus, 'Configuration loaded. You can now continue.', 'success');
+  setStatus(formStatus || voterStatus, 'Naload na ang configuration. Pwede ka na mopadayon.', 'success');
 }
 
 function hasAddressType(result, type) {
@@ -142,50 +149,156 @@ async function reverseGeocode(lat, lon) {
 
 async function requestLocation() {
   if (!navigator.geolocation) {
-    setStatus(locationStatus, 'Geolocation is not supported in your browser.', 'error');
+    setStatus(locationStatus, 'Dili suportado sa imong browser ang geolocation.', 'error');
     return;
   }
 
-  setStatus(locationStatus, 'Requesting location access...');
+  setStatus(locationStatus, 'Nangayo og access sa lokasyon...');
 
   navigator.geolocation.getCurrentPosition(
     async (position) => {
       const lat = position.coords.latitude;
       const lon = position.coords.longitude;
       latestCoords = { lat, lon };
-      setStatus(locationStatus, 'Location captured. Resolving full address...');
+      setStatus(locationStatus, 'Nakuha na ang lokasyon. Gikuha ang kompleto nga address...');
       try {
         const address = await reverseGeocode(lat, lon);
         form.elements.address.value = address;
-        setStatus(locationStatus, 'Location captured and complete address auto-filled.', 'success');
+        setStatus(locationStatus, 'Nakuha na ang lokasyon ug napuno na ang kompleto nga address.', 'success');
       } catch (error) {
         latestCoords = null;
         form.elements.address.value = '';
-        setStatus(locationStatus, `${error.message} Please try location again.`, 'error');
+        setStatus(locationStatus, `${error.message} Palihog sulayi pag-usab ang lokasyon.`, 'error');
       }
     },
     (error) => {
-      setStatus(locationStatus, `Location denied/unavailable (${error.message}).`, 'error');
+      setStatus(locationStatus, `Gidili o dili available ang lokasyon (${error.message}).`, 'error');
     },
     { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
   );
 }
 
+
+
+function markDeviceEntrySubmitted() {
+  window.localStorage.setItem(DEVICE_ENTRY_LOCK_KEY, 'true');
+}
+
+function hasDeviceEntrySubmitted() {
+  return window.localStorage.getItem(DEVICE_ENTRY_LOCK_KEY) === 'true';
+}
+
+function setEntryFormLocked() {
+  if (!form) return;
+
+  Array.from(form.elements).forEach((element) => {
+    element.disabled = true;
+  });
+
+  if (locateBtn) locateBtn.disabled = true;
+  setStatus(formStatus, 'Nakapuno na ka kaniadto. 1 ka entry ra matag device ang pwede.', 'error');
+}
+
+function buildVotingLink() {
+  return `${window.location.origin}/voting.html`;
+}
+
+function showVotingShareLink() {
+  if (!shareVoteWrap || !shareVoteLink) return;
+
+  shareVoteLink.value = buildVotingLink();
+  shareVoteWrap.classList.remove('hidden');
+  setStatus(copyVoteStatus, '');
+}
+
+async function copyVotingLink() {
+  if (!shareVoteLink?.value) return;
+
+  try {
+    await navigator.clipboard.writeText(shareVoteLink.value);
+    setStatus(copyVoteStatus, 'Malampusong nakopya ang link sa botohan.', 'success');
+  } catch (error) {
+    setStatus(copyVoteStatus, 'Dili makopya awtomatiko. Palihog kopyaha lang manual ang link.', 'error');
+  }
+}
+
+function isWinnersAvailable() {
+  return new Date().getTime() > ENTRY_DEADLINE.getTime();
+}
+
+function renderWinnerList(winners) {
+  if (!winnerList) return;
+  winnerList.innerHTML = '';
+
+  if (!winners.length) {
+    winnerList.innerHTML = '<li class="status-text">Wala pay modaog karon.</li>';
+    return;
+  }
+
+  winners.forEach((winner, index) => {
+    const item = document.createElement('li');
+    item.className = 'candidate-item';
+    item.innerHTML = `
+      <div>
+        <strong>#${index + 1} ${winner.full_name}</strong>
+        <p>${winner.address}</p>
+        <small>Votes: ${winner.vote_count || 0} | Points: ${winner.vote_points || 0}</small>
+      </div>
+    `;
+    winnerList.appendChild(item);
+  });
+}
+
+async function loadWinners() {
+  if (!winnerStatus) return;
+
+  if (!isWinnersAvailable()) {
+    setStatus(winnerStatus, 'Makita ang listahan sa modaog human sa May 30, 2026 (UTC).');
+    if (winnerList) winnerList.innerHTML = '';
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from('giveaway_entries')
+    .select('full_name, address, vote_count, vote_points')
+    .eq('purpose', 'school-supply')
+    .order('vote_points', { ascending: false })
+    .order('vote_count', { ascending: false })
+    .limit(2);
+
+  if (error) {
+    setStatus(winnerStatus, `Unable to load winners: ${error.message}`, 'error');
+    return;
+  }
+
+  renderWinnerList(data || []);
+  setStatus(winnerStatus, 'Anaa na karon ang listahan sa modaog.', 'success');
+}
 async function submitEntry(event) {
   event.preventDefault();
 
   if (!supabaseClient) return;
+  if (hasDeviceEntrySubmitted()) {
+    setEntryFormLocked();
+    return;
+  }
   if (!latestCoords || !form.elements.address.value.trim()) {
-    setStatus(formStatus, 'Please click Use My Current Location first.', 'error');
+    setStatus(formStatus, 'Palihog i-klik una ang Gamita ang Akong Karon nga Lokasyon.', 'error');
     return;
   }
 
   if (new Date().getTime() > ENTRY_DEADLINE.getTime()) {
-    setStatus(formStatus, 'Entry period is closed (deadline: May 30, 2026).', 'error');
+    setStatus(formStatus, 'Sirado na ang entry period (deadline: May 30, 2026).', 'error');
     return;
   }
 
-  setStatus(formStatus, 'Submitting your entry...');
+  const age = Number(form.elements.age.value);
+  if (Number.isNaN(age) || age < 5 || age > 10) {
+    setStatus(formStatus, 'Ang edad para sa estudyante ra (5 hangtod 10 anyos).', 'error');
+    return;
+  }
+
+  setStatus(formStatus, 'Gisumite ang imong entry...');
 
   const formData = new FormData(form);
   const payload = {
@@ -205,17 +318,20 @@ async function submitEntry(event) {
     return;
   }
 
+  markDeviceEntrySubmitted();
+  showVotingShareLink();
   form.reset();
   latestCoords = null;
-  setStatus(locationStatus, 'Location is required. Click Use My Current Location to continue.');
-  setStatus(formStatus, 'Entry submitted successfully. Good luck! 🎉', 'success');
+  setStatus(locationStatus, 'Kinahanglan ang lokasyon. I-klik ang Gamita ang Akong Karon nga Lokasyon aron makapadayon.');
+  setStatus(formStatus, 'Malampuson ang pagsumite sa entry. I-share ang imong voting link sa ubos. 🎉', 'success');
+  setEntryFormLocked();
 }
 
 function renderCandidateList(candidates) {
   candidateList.innerHTML = '';
 
   if (!candidates.length) {
-    candidateList.innerHTML = '<li class="status-text">No candidates yet.</li>';
+    candidateList.innerHTML = '<li class="status-text">Wala pay kandidato karon.</li>';
     return;
   }
 
@@ -260,29 +376,29 @@ async function saveVoter(event) {
   };
 
   if (!activeVoter.voter_name || !activeVoter.voter_age || !activeVoter.voter_location) {
-    setStatus(voterStatus, 'Complete voter details first.', 'error');
+    setStatus(voterStatus, 'Kumpletoha una ang detalye sa botante.', 'error');
     return;
   }
 
   if (hasDeviceVotedLocal()) {
-    setStatus(voterStatus, 'This device already voted. 1 device = 1 vote only.', 'error');
+    setStatus(voterStatus, 'Nakabotar na kining device. 1 ka device = 1 ka boto ra.', 'error');
     voteListWrap.classList.add('hidden');
     return;
   }
 
-  setStatus(voterStatus, 'Voter details accepted. You can now vote.', 'success');
+  setStatus(voterStatus, 'Dawat na ang detalye sa botante. Pwede na ka mobotar.', 'success');
   voteListWrap.classList.remove('hidden');
   await loadCandidates();
 }
 
 async function voteForCandidate(candidateId) {
   if (!activeVoter) {
-    setStatus(voteStatus, 'Please provide voter details before voting.', 'error');
+    setStatus(voteStatus, 'Palihog butangi una og detalye sa botante sa dili pa mobotar.', 'error');
     return;
   }
 
   if (hasDeviceVotedLocal()) {
-    setStatus(voteStatus, 'This device already voted. 1 device = 1 vote only.', 'error');
+    setStatus(voteStatus, 'Nakabotar na kining device. 1 ka device = 1 ka boto ra.', 'error');
     return;
   }
 
@@ -300,7 +416,7 @@ async function voteForCandidate(candidateId) {
 
   if ((existingVoteCount || 0) > 0) {
     markDeviceVoted();
-    setStatus(voteStatus, 'This device already voted. 1 device = 1 vote only.', 'error');
+    setStatus(voteStatus, 'Nakabotar na kining device. 1 ka device = 1 ka boto ra.', 'error');
     return;
   }
 
@@ -347,7 +463,7 @@ async function voteForCandidate(candidateId) {
   }
 
   markDeviceVoted();
-  setStatus(voteStatus, 'Vote submitted successfully! (+10 points). This device cannot vote again.', 'success');
+  setStatus(voteStatus, 'Malampuson ang boto! (+10 puntos). Dili na pwede mubotar pag-usab kining device.', 'success');
   await loadCandidates();
 }
 
@@ -362,9 +478,17 @@ if (candidateList) {
 if (locateBtn) locateBtn.addEventListener('click', requestLocation);
 if (form) form.addEventListener('submit', submitEntry);
 if (voterForm) voterForm.addEventListener('submit', saveVoter);
+if (copyVoteLinkBtn) copyVoteLinkBtn.addEventListener('click', copyVotingLink);
 if (countdownTimer) startCountdown();
 
-loadSupabaseClient().catch((error) => {
+if (hasDeviceEntrySubmitted()) {
+  showVotingShareLink();
+  setEntryFormLocked();
+}
+
+loadSupabaseClient()
+  .then(() => loadWinners())
+  .catch((error) => {
   if (formStatus) setStatus(formStatus, `${error.message} Check Vercel environment variables.`, 'error');
   if (voterStatus) setStatus(voterStatus, `${error.message} Check Vercel environment variables.`, 'error');
 });

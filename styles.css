@@ -63,3 +63,26 @@ textarea[readonly] { background: #f5f8ff; color: #45557a; cursor: not-allowed; }
 .deadline-label { margin: 0 0 .3rem; font-size: .82rem; font-weight: 700; color: #244ba5; text-transform: uppercase; letter-spacing: .03em; }
 .deadline-text { margin: 0; font-weight: 600; }
 .countdown-timer { margin: .35rem 0 0; font-weight: 800; color: #1c4fc4; }
+
+
+.share-box {
+  margin-top: .5rem;
+  background: #f7faff;
+  border: 1px dashed #b7cbff;
+  border-radius: 12px;
+  padding: .9rem;
+}
+.share-title {
+  margin: 0 0 .35rem;
+  font-weight: 700;
+  color: #244ba5;
+}
+.share-link-row {
+  margin-top: .5rem;
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+.share-link-row input {
+  flex: 1 1 260px;
+}

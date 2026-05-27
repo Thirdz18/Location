@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>School Supply Giveaway Entry Form</title>
+    <title>Porma sa Apil sa Hatag sa School Supplies</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -15,39 +15,38 @@
   <body data-page="entry">
     <main class="page">
       <section class="card">
-        <p class="badge">🎒 School Supply Support Giveaway</p>
-        <h1>₱200 School Supply Giveaway Form</h1>
+        <p class="badge">🎒 Tabang sa School Supplies para sa Estudyante</p>
+        <h1>₱200 nga Hatag para sa School Supplies</h1>
 
         <div class="tab-actions">
-          <a href="/entry.html" class="secondary-btn is-active">Entry Form</a>
-          <a href="/voting.html" class="secondary-btn">Voting Page</a>
+          <a href="/entry.html" class="secondary-btn is-active">Porma sa Apil</a>
         </div>
 
         <section id="entryTab" class="tab-panel is-active">
           <p class="subtitle">
-            Unlimited users can fill out this form until <strong>May 30, 2026</strong>. All approved entries will appear in the voting list.
-            The <strong>top 2 highest votes</strong> will win <strong>₱200 each</strong>.
+            Ang tumong ani nga programa mao ang pagtabang sa mga estudyante sa school supplies. Pwede magpasa og porma hangtod <strong>May 30, 2026</strong>. Ang tanang na-aprubahan nga entries makita sa listahan sa botohan.
+            Ang <strong>top 2 nga pinakataas ug boto</strong> maoy makadawat ug <strong>₱200 matag usa</strong>.
           </p>
 
           <div class="deadline-box">
-            <p class="deadline-label">Form Deadline</p>
-            <p id="deadlineText" class="deadline-text">Entries close on May 30, 2026</p>
-            <p id="countdownTimer" class="countdown-timer" aria-live="polite">Loading timer...</p>
+            <p class="deadline-label">Katapusang Adlaw sa Porma</p>
+            <p id="deadlineText" class="deadline-text">Ang pagsumite kutob sa May 30, 2026</p>
+            <p id="countdownTimer" class="countdown-timer" aria-live="polite">Gi-load ang timer...</p>
           </div>
 
           <form id="giveawayForm" class="form">
-            <label>Full Name<input type="text" name="full_name" placeholder="Juan Dela Cruz" required /></label>
+            <label>Tibuok Ngalan<input type="text" name="full_name" placeholder="Juan Dela Cruz" required /></label>
             <label>
-              Mobile Number
+              Numero sa Cellphone
               <input type="tel" name="mobile_number" placeholder="09XXXXXXXXX" pattern="^09\d{9}$" required />
             </label>
-            <label>Age<input type="number" name="age" min="13" max="100" required /></label>
+            <label>Edad (para sa estudyante ra, 5 hangtod 10 anyos)<input type="number" name="age" min="5" max="10" required /></label>
             <label>
-              Full Address
+              Tibuok Address
               <textarea
                 name="address"
                 rows="3"
-                placeholder="Complete address will be auto-filled after clicking Use My Current Location"
+                placeholder="Ang kompleto nga address awtomatikong mapuno human i-klik ang Gamita ang Akong Karon nga Lokasyon"
                 required
                 readonly
                 aria-readonly="true"
@@ -55,17 +54,27 @@
             </label>
 
             <div class="location-wrap">
-              <button type="button" id="locateBtn" class="secondary-btn">Use My Current Location</button>
-              <p id="locationStatus" class="status-text">Location is required. Click Use My Current Location to continue.</p>
+              <button type="button" id="locateBtn" class="secondary-btn">Gamita ang Akong Karon nga Lokasyon</button>
+              <p id="locationStatus" class="status-text">Kinahanglan ang lokasyon. I-klik ang Gamita ang Akong Karon nga Lokasyon aron makapadayon.</p>
             </div>
 
             <label class="checkbox">
               <input type="checkbox" name="consent" required />
-              <span>I agree to share my details for this giveaway and voting process.</span>
+              <span>Miuyon ko nga i-share ang akong detalye para ani nga programa ug botohan (para sa estudyante ra).</span>
             </label>
 
-            <button type="submit" class="primary-btn">Submit Entry</button>
+            <button type="submit" class="primary-btn">Isumite ang Apil</button>
             <p id="formStatus" class="status-text" aria-live="polite"></p>
+
+            <div id="shareVoteWrap" class="share-box hidden">
+              <p class="share-title">I-share ang imong link sa botohan</p>
+              <p class="status-text">Pwede nimo i-share kining link aron madani ang uban nga mobotar para nimo.</p>
+              <div class="share-link-row">
+                <input id="shareVoteLink" type="text" readonly aria-readonly="true" />
+                <button type="button" id="copyVoteLinkBtn" class="secondary-btn">Kopyaha ang Link</button>
+              </div>
+              <p id="copyVoteStatus" class="status-text" aria-live="polite"></p>
+            </div>
           </form>
         </section>
       </section>

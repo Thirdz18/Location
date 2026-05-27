@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mga Modaog sa School Supplies</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="winner">
+    <main class="page">
+      <section class="card">
+        <p class="badge">🏆 Listahan sa Modaog</p>
+        <h1>Top 2 nga Modaog sa School Supplies</h1>
+
+        <div class="tab-actions">
+          <a href="/winner.html" class="secondary-btn is-active">Panid sa Modaog</a>
+        </div>
+
+        <section class="tab-panel is-active">
+          <p class="subtitle">Ang tumong ani nga panid mao ang pagpakita sa opisyal nga modaog. Ipahibalo lang ang modaog human sa <strong>May 30, 2026 (UTC)</strong>. Ang top 2 ra nga pinakataas ug boto ang ipakita diri.</p>
+          <p id="winnerStatus" class="status-text" aria-live="polite">Gi-load ang listahan sa modaog...</p>
+          <ul id="winnerList" class="candidate-list"></ul>
+        </section>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
