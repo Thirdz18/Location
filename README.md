@@ -59,3 +59,11 @@ create unique index if not exists entry_votes_device_id_key
   - inserting to `giveaway_entries`
   - reading `giveaway_entries`
   - inserting to `entry_votes`
+
+
+## Public Links
+
+- Entry Form only: `/entry.html`
+- Voting Page only: `/voting.html`
+
+You can now share each link separately so users only see the specific page you share.

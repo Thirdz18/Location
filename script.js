@@ -2,10 +2,6 @@ const form = document.getElementById('giveawayForm');
 const formStatus = document.getElementById('formStatus');
 const locationStatus = document.getElementById('locationStatus');
 const locateBtn = document.getElementById('locateBtn');
-const showEntryTab = document.getElementById('showEntryTab');
-const showVotingTab = document.getElementById('showVotingTab');
-const entryTab = document.getElementById('entryTab');
-const votingTab = document.getElementById('votingTab');
 const voterForm = document.getElementById('voterForm');
 const voterStatus = document.getElementById('voterStatus');
 const voteListWrap = document.getElementById('voteListWrap');
@@ -85,21 +81,14 @@ function startCountdown() {
 }
 
 function setStatus(target, message, type = '') {
+  if (!target) return;
   target.textContent = message;
   target.className = 'status-text';
   if (type) target.classList.add(type);
 }
 
-function switchTab(tab) {
-  const isEntry = tab === 'entry';
-  entryTab.classList.toggle('is-active', isEntry);
-  votingTab.classList.toggle('is-active', !isEntry);
-  showEntryTab.classList.toggle('is-active', isEntry);
-  showVotingTab.classList.toggle('is-active', !isEntry);
-}
-
 async function loadSupabaseClient() {
-  setStatus(formStatus, 'Loading secure configuration...');
+  setStatus(formStatus || voterStatus, 'Loading secure configuration...');
   const response = await fetch('/api/config');
   const data = await response.json();
 
@@ -109,7 +98,7 @@ async function loadSupabaseClient() {
 
   supabaseClient = window.supabase.createClient(data.supabaseUrl, data.supabaseAnonKey);
   googleMapsApiKey = data.googleMapsApiKey;
-  setStatus(formStatus, 'Configuration loaded. You can now submit your entry.', 'success');
+  setStatus(formStatus || voterStatus, 'Configuration loaded. You can now continue.', 'success');
 }
 
 function hasAddressType(result, type) {
@@ -362,20 +351,20 @@ async function voteForCandidate(candidateId) {
   await loadCandidates();
 }
 
-candidateList.addEventListener('click', async (event) => {
-  const button = event.target.closest('button[data-id]');
-  if (!button) return;
-  await voteForCandidate(button.dataset.id);
-});
+if (candidateList) {
+  candidateList.addEventListener('click', async (event) => {
+    const button = event.target.closest('button[data-id]');
+    if (!button) return;
+    await voteForCandidate(button.dataset.id);
+  });
+}
 
-showEntryTab.addEventListener('click', () => switchTab('entry'));
-showVotingTab.addEventListener('click', () => switchTab('voting'));
-locateBtn.addEventListener('click', requestLocation);
-form.addEventListener('submit', submitEntry);
-voterForm.addEventListener('submit', saveVoter);
-
-startCountdown();
+if (locateBtn) locateBtn.addEventListener('click', requestLocation);
+if (form) form.addEventListener('submit', submitEntry);
+if (voterForm) voterForm.addEventListener('submit', saveVoter);
+if (countdownTimer) startCountdown();
 
 loadSupabaseClient().catch((error) => {
-  setStatus(formStatus, `${error.message} Check Vercel environment variables.`, 'error');
+  if (formStatus) setStatus(formStatus, `${error.message} Check Vercel environment variables.`, 'error');
+  if (voterStatus) setStatus(voterStatus, `${error.message} Check Vercel environment variables.`, 'error');
 });
