@@ -28,6 +28,39 @@ async function loadSupabaseClient() {
   setStatus(formStatus, 'Configuration loaded. You can now submit your entry.', 'success');
 }
 
+function hasAddressType(result, type) {
+  return Array.isArray(result?.types) && result.types.includes(type);
+}
+
+function getComponentByType(components, wantedType) {
+  return components.find((component) => component.types?.includes(wantedType));
+}
+
+function buildReadableAddress(result) {
+  const components = Array.isArray(result?.address_components) ? result.address_components : [];
+
+  const streetNumber = getComponentByType(components, 'street_number')?.long_name || '';
+  const route = getComponentByType(components, 'route')?.long_name || '';
+  const neighborhood =
+    getComponentByType(components, 'sublocality_level_1')?.long_name ||
+    getComponentByType(components, 'sublocality')?.long_name ||
+    getComponentByType(components, 'neighborhood')?.long_name ||
+    getComponentByType(components, 'political')?.long_name ||
+    '';
+  const barangay =
+    getComponentByType(components, 'administrative_area_level_3')?.long_name ||
+    getComponentByType(components, 'administrative_area_level_4')?.long_name ||
+    '';
+  const locality = getComponentByType(components, 'locality')?.long_name || '';
+  const province = getComponentByType(components, 'administrative_area_level_1')?.long_name || '';
+  const country = getComponentByType(components, 'country')?.long_name || '';
+
+  const firstLine = [streetNumber, route].filter(Boolean).join(' ').trim();
+  const secondLine = neighborhood || barangay;
+
+  return [firstLine, secondLine, locality, province, country].filter(Boolean).join(', ');
+}
+
 async function reverseGeocode(lat, lon) {
   if (!googleMapsApiKey) {
     throw new Error('Google Maps API key is missing from runtime configuration.');
@@ -49,7 +82,15 @@ async function reverseGeocode(lat, lon) {
     throw new Error('Google could not resolve a valid address for this location.');
   }
 
-  return data.results[0]?.formatted_address || '';
+  const preferredResult =
+    data.results.find((result) => hasAddressType(result, 'street_address')) ||
+    data.results.find((result) => hasAddressType(result, 'premise')) ||
+    data.results.find((result) => hasAddressType(result, 'subpremise')) ||
+    data.results.find((result) => hasAddressType(result, 'plus_code') === false) ||
+    data.results[0];
+
+  const readableAddress = buildReadableAddress(preferredResult);
+  return readableAddress || preferredResult?.formatted_address || '';
 }
 
 async function requestLocation() {
