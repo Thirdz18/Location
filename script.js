@@ -60,18 +60,22 @@ async function requestLocation() {
 
       try {
         const address = await reverseGeocode(lat, lon);
-        if (address) {
-          form.elements.address.value = address;
+        if (!address) {
+          throw new Error('Unable to resolve a complete address from your location.');
         }
-        setStatus(locationStatus, 'Location captured and address auto-filled.', 'success');
+
+        form.elements.address.value = address;
+        setStatus(locationStatus, 'Location captured and complete address auto-filled.', 'success');
       } catch (error) {
-        setStatus(locationStatus, `${error.message} Please type your address manually.`, 'error');
+        latestCoords = null;
+        form.elements.address.value = '';
+        setStatus(locationStatus, `${error.message} Please try location again.`, 'error');
       }
     },
     (error) => {
       setStatus(
         locationStatus,
-        `Location permission denied or unavailable (${error.message}). You can continue with manual address entry.`,
+        `Location permission denied or unavailable (${error.message}). Location access is required to submit.`,
         'error'
       );
     },
@@ -83,11 +87,53 @@ async function requestLocation() {
   );
 }
 
+
+function launchCongratsAnimation() {
+  const container = document.createElement('div');
+  container.className = 'congrats-overlay';
+  container.setAttribute('aria-hidden', 'true');
+
+  const banner = document.createElement('div');
+  banner.className = 'congrats-banner';
+  banner.textContent = '🎉 Congrats! Entry Submitted! 🎉';
+  container.appendChild(banner);
+
+  const colors = ['#2e6cf6', '#00b894', '#ff7675', '#fdcb6e', '#6c5ce7', '#00cec9'];
+  for (let i = 0; i < 42; i += 1) {
+    const piece = document.createElement('span');
+    piece.className = 'confetti-piece';
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = `${Math.random() * 0.45}s`;
+    piece.style.animationDuration = `${2.6 + Math.random() * 1.2}s`;
+    container.appendChild(piece);
+  }
+
+  document.body.appendChild(container);
+
+  window.setTimeout(() => {
+    container.classList.add('fade-out');
+  }, 1900);
+
+  window.setTimeout(() => {
+    container.remove();
+  }, 2600);
+}
+
 async function submitEntry(event) {
   event.preventDefault();
 
   if (!supabaseClient) {
     setStatus(formStatus, 'Configuration is still loading. Please wait and try again.', 'error');
+    return;
+  }
+
+  if (!latestCoords || !form.elements.address.value.trim()) {
+    setStatus(
+      formStatus,
+      'Please click Use My Current Location first so we can fetch your complete address.',
+      'error'
+    );
     return;
   }
 
@@ -114,8 +160,9 @@ async function submitEntry(event) {
 
   form.reset();
   latestCoords = null;
-  setStatus(locationStatus, 'Location not requested yet.');
+  setStatus(locationStatus, 'Location is required. Click Use My Current Location to continue.');
   setStatus(formStatus, 'Entry submitted successfully. Good luck! 🎉', 'success');
+  launchCongratsAnimation();
 }
 
 locateBtn.addEventListener('click', requestLocation);

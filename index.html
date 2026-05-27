@@ -19,7 +19,7 @@
         <h1>₱200 School Supply Giveaway Form</h1>
         <p class="subtitle">
           We will select <strong>2 winners</strong>. Please complete the form honestly.
-          Location access helps verify entries and auto-fill your address.
+          Location access is required to verify entries and automatically fetch your complete address.
         </p>
 
         <div class="notice">
@@ -57,14 +57,16 @@
             <textarea
               name="address"
               rows="3"
-              placeholder="House/Block, Street, Barangay, City, Province"
+              placeholder="Complete address will be auto-filled after clicking Use My Current Location"
               required
+              readonly
+              aria-readonly="true"
             ></textarea>
           </label>
 
           <div class="location-wrap">
             <button type="button" id="locateBtn" class="secondary-btn">Use My Current Location</button>
-            <p id="locationStatus" class="status-text">Location not requested yet.</p>
+            <p id="locationStatus" class="status-text">Location is required. Click Use My Current Location to continue.</p>
           </div>
 
           <label class="checkbox">

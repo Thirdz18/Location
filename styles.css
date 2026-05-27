@@ -114,6 +114,17 @@ textarea:focus {
   border-color: #7ca1f9;
 }
 
+
+textarea[readonly] {
+  background: #f5f8ff;
+  color: #45557a;
+  cursor: not-allowed;
+}
+
+textarea[readonly]:focus {
+  outline: none;
+  border-color: #c6d4f6;
+}
 .location-wrap {
   display: grid;
   gap: 0.45rem;
@@ -166,4 +177,58 @@ textarea:focus {
 
 .status-text.error {
   color: var(--error);
+}
+
+
+.congrats-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.congrats-banner {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  transform: translateX(-50%) scale(0.85);
+  background: rgba(46, 108, 246, 0.96);
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  border-radius: 999px;
+  padding: 0.8rem 1.15rem;
+  box-shadow: 0 14px 26px rgba(46, 108, 246, 0.35);
+  animation: popIn 420ms ease-out forwards;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -10px;
+  width: 9px;
+  height: 16px;
+  border-radius: 2px;
+  opacity: 0.95;
+  animation-name: confettiFall;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.congrats-overlay.fade-out {
+  animation: fadeOverlay 420ms ease-in forwards;
+}
+
+@keyframes popIn {
+  0% { transform: translateX(-50%) scale(0.7); opacity: 0; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+@keyframes confettiFall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 0.95; }
+  100% { transform: translateY(105vh) rotate(680deg); opacity: 0.95; }
+}
+
+@keyframes fadeOverlay {
+  to { opacity: 0; }
 }
