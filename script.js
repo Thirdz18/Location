@@ -196,7 +196,7 @@ function setEntryFormLocked() {
   });
 
   if (locateBtn) locateBtn.disabled = true;
-  setStatus(formStatus, 'Nakapuno na ka kaniadto. 1 ka entry ra matag device ang pwede.', 'error');
+  setStatus(formStatus, 'Malampuson ang pagsumite. Nalock na ang form para malikayan ang duplicate submit sa same browser.', 'success');
 }
 
 function buildVotingLink() {
@@ -279,8 +279,7 @@ async function submitEntry(event) {
 
   if (!supabaseClient) return;
   if (hasDeviceEntrySubmitted()) {
-    setEntryFormLocked();
-    return;
+    setStatus(formStatus, 'Nadetect nga nakasubmit na ni nga browser kaniadto. Kung sayop ni, pwede gihapon ka mosulay og submit karon.', '');
   }
   if (!latestCoords || !form.elements.address.value.trim()) {
     setStatus(formStatus, 'Palihog i-klik una ang Gamita ang Akong Karon nga Lokasyon.', 'error');
@@ -483,7 +482,7 @@ if (countdownTimer) startCountdown();
 
 if (hasDeviceEntrySubmitted()) {
   showVotingShareLink();
-  setEntryFormLocked();
+  setStatus(formStatus, 'Nadetect nga nakasubmit na ni nga browser kaniadto. Pwede gihapon ka mo-fillout ug mo-submit kung kinahanglan.', '');
 }
 
 loadSupabaseClient()
