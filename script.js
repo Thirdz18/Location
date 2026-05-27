@@ -23,6 +23,30 @@ const VOTE_POINTS = 10;
 
 const ENTRY_DEADLINE = new Date('2026-05-30T23:59:59Z');
 
+const DEVICE_KEY = 'giveaway_device_id';
+const DEVICE_VOTED_KEY = 'giveaway_device_voted';
+
+function getDeviceId() {
+  let deviceId = window.localStorage.getItem(DEVICE_KEY);
+  if (!deviceId) {
+    if (window.crypto?.randomUUID) {
+      deviceId = window.crypto.randomUUID();
+    } else {
+      deviceId = `dev-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    }
+    window.localStorage.setItem(DEVICE_KEY, deviceId);
+  }
+  return deviceId;
+}
+
+function markDeviceVoted() {
+  window.localStorage.setItem(DEVICE_VOTED_KEY, 'true');
+}
+
+function hasDeviceVotedLocal() {
+  return window.localStorage.getItem(DEVICE_VOTED_KEY) === 'true';
+}
+
 function formatTimeLeft(ms) {
   const totalSeconds = Math.floor(ms / 1000);
   const days = Math.floor(totalSeconds / 86400);
@@ -251,6 +275,12 @@ async function saveVoter(event) {
     return;
   }
 
+  if (hasDeviceVotedLocal()) {
+    setStatus(voterStatus, 'This device already voted. 1 device = 1 vote only.', 'error');
+    voteListWrap.classList.add('hidden');
+    return;
+  }
+
   setStatus(voterStatus, 'Voter details accepted. You can now vote.', 'success');
   voteListWrap.classList.remove('hidden');
   await loadCandidates();
@@ -262,11 +292,35 @@ async function voteForCandidate(candidateId) {
     return;
   }
 
+  if (hasDeviceVotedLocal()) {
+    setStatus(voteStatus, 'This device already voted. 1 device = 1 vote only.', 'error');
+    return;
+  }
+
+  const deviceId = getDeviceId();
+
+  const { count: existingVoteCount, error: existingVoteErr } = await supabaseClient
+    .from('entry_votes')
+    .select('*', { head: true, count: 'exact' })
+    .eq('device_id', deviceId);
+
+  if (existingVoteErr) {
+    setStatus(voteStatus, `Unable to validate device vote history: ${existingVoteErr.message}`, 'error');
+    return;
+  }
+
+  if ((existingVoteCount || 0) > 0) {
+    markDeviceVoted();
+    setStatus(voteStatus, 'This device already voted. 1 device = 1 vote only.', 'error');
+    return;
+  }
+
   const votePayload = {
     entry_id: Number(candidateId),
     voter_name: activeVoter.voter_name,
     voter_age: activeVoter.voter_age,
     voter_location: activeVoter.voter_location,
+    device_id: deviceId,
     points: VOTE_POINTS,
     voted_at: new Date().toISOString()
   };
@@ -303,7 +357,8 @@ async function voteForCandidate(candidateId) {
     return;
   }
 
-  setStatus(voteStatus, 'Vote submitted successfully! (+10 points)', 'success');
+  markDeviceVoted();
+  setStatus(voteStatus, 'Vote submitted successfully! (+10 points). This device cannot vote again.', 'success');
   await loadCandidates();
 }
 

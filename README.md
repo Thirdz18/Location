@@ -32,14 +32,24 @@ create table if not exists public.entry_votes (
   voter_name text not null,
   voter_age int not null,
   voter_location text not null,
+  device_id text not null,
   points int not null default 10,
   voted_at timestamptz not null default now()
 );
+
+create unique index if not exists entry_votes_device_id_key
+  on public.entry_votes(device_id);
 
 -- Optional safety check (if table already exists and you only need new columns)
 alter table public.giveaway_entries
   add column if not exists vote_count int not null default 0,
   add column if not exists vote_points int not null default 0;
+
+alter table public.entry_votes
+  add column if not exists device_id text;
+
+create unique index if not exists entry_votes_device_id_key
+  on public.entry_votes(device_id);
 ```
 
 ## Notes
