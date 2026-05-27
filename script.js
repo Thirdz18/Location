@@ -87,6 +87,39 @@ async function requestLocation() {
   );
 }
 
+
+function launchCongratsAnimation() {
+  const container = document.createElement('div');
+  container.className = 'congrats-overlay';
+  container.setAttribute('aria-hidden', 'true');
+
+  const banner = document.createElement('div');
+  banner.className = 'congrats-banner';
+  banner.textContent = '🎉 Congrats! Entry Submitted! 🎉';
+  container.appendChild(banner);
+
+  const colors = ['#2e6cf6', '#00b894', '#ff7675', '#fdcb6e', '#6c5ce7', '#00cec9'];
+  for (let i = 0; i < 42; i += 1) {
+    const piece = document.createElement('span');
+    piece.className = 'confetti-piece';
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = `${Math.random() * 0.45}s`;
+    piece.style.animationDuration = `${2.6 + Math.random() * 1.2}s`;
+    container.appendChild(piece);
+  }
+
+  document.body.appendChild(container);
+
+  window.setTimeout(() => {
+    container.classList.add('fade-out');
+  }, 1900);
+
+  window.setTimeout(() => {
+    container.remove();
+  }, 2600);
+}
+
 async function submitEntry(event) {
   event.preventDefault();
 
@@ -129,6 +162,7 @@ async function submitEntry(event) {
   latestCoords = null;
   setStatus(locationStatus, 'Location is required. Click Use My Current Location to continue.');
   setStatus(formStatus, 'Entry submitted successfully. Good luck! 🎉', 'success');
+  launchCongratsAnimation();
 }
 
 locateBtn.addEventListener('click', requestLocation);
