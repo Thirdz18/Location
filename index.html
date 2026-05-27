@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>School Supply Giveaway Submission</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="card">
+        <p class="badge">🎒 School Supply Support Giveaway</p>
+        <h1>₱200 School Supply Giveaway Form</h1>
+        <p class="subtitle">
+          We will select <strong>2 winners</strong>. Please complete the form honestly.
+          Location access helps verify entries and auto-fill your address.
+        </p>
+
+        <div class="notice">
+          <h2>Privacy Notice</h2>
+          <p>
+            We collect your personal information only for this giveaway screening.
+            Entries will be reviewed once and removed after the winner selection period.
+          </p>
+        </div>
+
+        <form id="giveawayForm" class="form">
+          <label>
+            Full Name
+            <input type="text" name="full_name" placeholder="Juan Dela Cruz" required />
+          </label>
+
+          <label>
+            Mobile Number
+            <input
+              type="tel"
+              name="mobile_number"
+              placeholder="09XXXXXXXXX"
+              pattern="^09\d{9}$"
+              required
+            />
+          </label>
+
+          <label>
+            Age
+            <input type="number" name="age" min="13" max="100" required />
+          </label>
+
+          <label>
+            Full Address
+            <textarea
+              name="address"
+              rows="3"
+              placeholder="House/Block, Street, Barangay, City, Province"
+              required
+            ></textarea>
+          </label>
+
+          <div class="location-wrap">
+            <button type="button" id="locateBtn" class="secondary-btn">Use My Current Location</button>
+            <p id="locationStatus" class="status-text">Location not requested yet.</p>
+          </div>
+
+          <label class="checkbox">
+            <input type="checkbox" name="consent" required />
+            <span>
+              I agree to share my details for this school supply giveaway and understand
+              that only valid entries will be considered.
+            </span>
+          </label>
+
+          <button type="submit" class="primary-btn">Submit Entry</button>
+          <p id="formStatus" class="status-text" aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
