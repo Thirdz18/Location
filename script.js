@@ -5,6 +5,7 @@ const locateBtn = document.getElementById('locateBtn');
 
 let latestCoords = null;
 let supabaseClient = null;
+let googleMapsApiKey = '';
 
 function setStatus(target, message, type = '') {
   target.textContent = message;
@@ -23,23 +24,32 @@ async function loadSupabaseClient() {
   }
 
   supabaseClient = window.supabase.createClient(data.supabaseUrl, data.supabaseAnonKey);
+  googleMapsApiKey = data.googleMapsApiKey;
   setStatus(formStatus, 'Configuration loaded. You can now submit your entry.', 'success');
 }
 
 async function reverseGeocode(lat, lon) {
-  const endpoint = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
-  const response = await fetch(endpoint, {
-    headers: {
-      Accept: 'application/json'
-    }
-  });
+  if (!googleMapsApiKey) {
+    throw new Error('Google Maps API key is missing from runtime configuration.');
+  }
+
+  const endpoint = new URL('https://maps.googleapis.com/maps/api/geocode/json');
+  endpoint.searchParams.set('latlng', `${lat},${lon}`);
+  endpoint.searchParams.set('key', googleMapsApiKey);
+
+  const response = await fetch(endpoint.toString());
 
   if (!response.ok) {
     throw new Error('Unable to fetch address from location coordinates.');
   }
 
   const data = await response.json();
-  return data.display_name || '';
+
+  if (data.status !== 'OK' || !Array.isArray(data.results) || data.results.length === 0) {
+    throw new Error('Google could not resolve a valid address for this location.');
+  }
+
+  return data.results[0]?.formatted_address || '';
 }
 
 async function requestLocation() {
