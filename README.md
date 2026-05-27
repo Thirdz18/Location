@@ -4,7 +4,7 @@ Simple frontend submission form for a **₱200 school supply giveaway** (2 winne
 
 - Full name, mobile number, age, and address fields
 - Optional geolocation permission request
-- Reverse geocoding to auto-fill full address
+- Google Maps reverse geocoding to auto-fill full address
 - Supabase insert for persistence
 - Vercel API route to securely read environment variables
 
@@ -14,6 +14,7 @@ In **Vercel → Project Settings → Environment Variables**, add:
 
 - `SUPABASE_URL` = your Supabase project URL (example: `https://xxxx.supabase.co`)
 - `SUPABASE_ANON_KEY` = your Supabase anon key
+- `GOOGLE_MAPS_API_KEY` = Google Maps Geocoding API key
 
 > These are fetched by `/api/config` at runtime and used by the frontend.
 
@@ -49,4 +50,4 @@ If RLS is enabled, add a policy allowing `insert` for anon/authenticated users a
 - `script.js` – client-side logic + Supabase submission
 - `api/config.js` – runtime config endpoint for Vercel env vars
 
-> Note: Browser location permission provides coordinates (lat/lon), not guaranteed exact full address. Address is resolved via reverse geocoding and can still be edited manually.
+> Note: Browser location permission provides coordinates (lat/lon), not guaranteed exact full address. Address is resolved via Google reverse geocoding and can still be edited manually.
